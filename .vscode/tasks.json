@@ -1,0 +1,15 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "Run Flask QR Code Website",
+			"command": "/home/arshad/Desktop/codeplay/QR-Code Website/venv/bin/python",
+			"args": [
+				"app.py"
+			],
+			"isBackground": true,
+			"group": "build"
+		}
+	]
+}

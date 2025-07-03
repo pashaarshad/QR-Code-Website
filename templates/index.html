@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 420px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 32px 24px 32px 24px;
+            border-radius: 18px;
+            box-shadow: 0 6px 32px rgba(0,0,0,0.13);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 18px;
+            color: #2d3a4b;
+            letter-spacing: 1px;
+        }
+        form {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        input[type="text"] {
+            padding: 13px 12px;
+            border: 1.5px solid #b3c6e0;
+            border-radius: 7px;
+            font-size: 17px;
+            transition: border 0.2s;
+            outline: none;
+        }
+        input[type="text"]:focus {
+            border: 1.5px solid #007bff;
+            background: #f0f7ff;
+        }
+        button {
+            padding: 12px;
+            background: linear-gradient(90deg, #007bff 60%, #00c6ff 100%);
+            color: #fff;
+            border: none;
+            border-radius: 7px;
+            font-size: 17px;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,123,255,0.08);
+            transition: background 0.2s, transform 0.1s;
+        }
+        button:hover {
+            background: linear-gradient(90deg, #0056b3 60%, #007bff 100%);
+            transform: translateY(-2px) scale(1.03);
+        }
+        .qr-section {
+            text-align: center;
+            margin-top: 28px;
+            width: 100%;
+        }
+        #qrImage {
+            margin: 0 auto 12px auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+            background: #f8fafc;
+            padding: 10px;
+            max-width: 100%;
+            height: auto;
+        }
+        .download-btn {
+            margin-top: 10px;
+            background: linear-gradient(90deg, #28a745 60%, #43e97b 100%);
+            font-weight: 500;
+            font-size: 16px;
+            border-radius: 7px;
+            box-shadow: 0 2px 8px rgba(40,167,69,0.08);
+        }
+        .download-btn:hover {
+            background: linear-gradient(90deg, #1e7e34 60%, #28a745 100%);
+        }
+        @media (max-width: 600px) {
+            .container {
+                max-width: 98vw;
+                margin: 16px 1vw;
+                padding: 18px 4vw 24px 4vw;
+                border-radius: 12px;
+            }
+            h2 {
+                font-size: 1.3rem;
+            }
+            input[type="text"], button, .download-btn {
+                font-size: 15px;
+                padding: 10px;
+            }
+            #qrImage {
+                padding: 6px;
+                border-radius: 7px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>QR Code Generator</h2>
+        <form method="POST" id="qrForm">
+            <input type="text" name="link" id="link" placeholder="Enter your link here" required value="{{ link_val|default('') }}">
+            <button type="submit">Generate QR Code</button>
+        </form>
+        {% if qr_img %}
+        <div class="qr-section">
+            <img id="qrImage" src="data:image/png;base64,{{ qr_img|safe }}" alt="QR Code" style="max-width: 100%; height: auto;">
+            <form method="POST" action="/download">
+                <input type="hidden" name="link" value="{{ link_val }}">
+                <button type="submit" class="download-btn">Download QR Code</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
