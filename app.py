@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, send_file
 import qrcode
 import io
 
+# idea now i will comever this full into javascripy
+
 app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
