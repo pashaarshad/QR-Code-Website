@@ -48,4 +48,5 @@ def download():
     return send_file(buf, mimetype='image/png', as_attachment=True, download_name='qrcodeap.png')
 
 if __name__ == '__main__':
+    # Only for local development; Gunicorn will run the app in production
     app.run(debug=True)
