@@ -2,12 +2,11 @@ from flask import Flask, render_template, request, send_file, jsonify, flash, re
 import qrcode
 import io
 import re
-import os
 from urllib.parse import urlparse
 import datetime
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-here')  # Use environment variable in production
+app.secret_key = 'your-secret-key-here'  # Change this in production
 
 def is_valid_url(url):
     """Check if the provided string is a valid URL"""
@@ -83,8 +82,5 @@ def download():
         return redirect('/')
 
 if __name__ == '__main__':
-    import os
-    # Get port from environment variable or use 5000 as default
-    port = int(os.environ.get('PORT', 5000))
-    # For Render deployment, we need to bind to 0.0.0.0
-    app.run(host='0.0.0.0', port=port, debug=False)
+    # Only for local development; Gunicorn will run the app in production
+    app.run(debug=True)

@@ -1,6 +1,4 @@
-#!/bin/sh
-'''exec' "/home/arshad/Desktop/codeplay/QR-Code Website/venv/bin/python3" "$0" "$@"
-' '''
+#!/home/arshad/Desktop/codeplay/QR-Code-Website/venv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys
