@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 # Render build script
 
+# Update pip to latest version
+pip install --upgrade pip
+
 # Install dependencies
 pip install -r requirements.txt
 
-# You can add any additional build steps here if needed
+# Verify installation
+python -c "import flask, qrcode, gunicorn; print('All dependencies installed successfully!')"
+
 echo "Build completed successfully!"
