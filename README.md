@@ -154,6 +154,38 @@ python app.py
 gunicorn -w 4 -b 0.0.0.0:8000 app:app
 ```
 
+### 🌐 Render.com Deployment
+
+This project is optimized for [Render.com](https://render.com) deployment:
+
+#### Step-by-step Render Deployment:
+
+1. **Push to GitHub**: Make sure your code is in a GitHub repository
+
+2. **Connect to Render**:
+   - Go to [render.com](https://render.com)
+   - Click "New Web Service"
+   - Connect your GitHub repository
+
+3. **Configure the service**:
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `gunicorn -w 4 -b 0.0.0.0:$PORT app:app`
+   - **Environment**: `Python 3`
+
+4. **Set Environment Variables** (in Render dashboard):
+   ```
+   SECRET_KEY=your-super-secret-production-key-here
+   FLASK_ENV=production
+   ```
+
+5. **Deploy**: Click "Create Web Service"
+
+#### Render Configuration:
+- **Runtime**: Python 3.12
+- **Build Command**: `pip install -r requirements.txt`
+- **Start Command**: `gunicorn -w 4 -b 0.0.0.0:$PORT app:app`
+- **Auto-Deploy**: Yes (deploys on every git push)
+
 ### Docker (Optional)
 ```dockerfile
 FROM python:3.9-slim
