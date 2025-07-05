@@ -74,75 +74,67 @@
 
 ```
 qr-code-generator/
-├── app.py                 # Main Flask application
-├── requirements.txt       # Python dependencies
+├── app.py                 # Lightweight Flask application
+├── requirements.txt       # Python dependencies (Flask + Gunicorn only)
+├── runtime.txt           # Python version for hosting platforms
+├── Procfile              # Heroku deployment configuration
+├── render-build.sh       # Render.com build script
 ├── README.md             # Project documentation
 ├── templates/
-│   └── index.html        # Main HTML template with modern UI
+│   └── index.html        # Main HTML template with client-side QR generation
 └── venv/                 # Virtual environment (created after setup)
 ```
 
 ## 🛠️ Technical Details
 
 ### Backend
-- **Flask**: Lightweight Python web framework
-- **qrcode**: Python library for QR code generation
-- **Pillow**: Image processing library
-- **io**: For in-memory file handling
+- **Flask**: Lightweight Python web framework for serving the application
+- **Gunicorn**: Production WSGI server for hosting
+- **Client-Side QR Generation**: No server-side image processing dependencies
 
 ### Frontend
 - **HTML5**: Semantic markup
 - **CSS3**: Modern styling with gradients, animations, and responsive design
-- **JavaScript**: Interactive features and clipboard functionality
+- **JavaScript**: Interactive features and QR code generation
+- **QRCode.js**: Client-side QR code generation library
 - **Font Awesome**: Beautiful icons
 - **Google Fonts**: Inter font family for modern typography
 
-### Features Implementation
+### Architecture Benefits
 
-| Feature | Technology | Description |
-|---------|------------|-------------|
-| QR Generation | Python `qrcode` | High-quality QR code creation |
-| Base64 Encoding | Python `base64` | Efficient image display |
-| File Download | Flask `send_file` | Secure file serving |
-| Responsive Design | CSS Grid/Flexbox | Mobile-first approach |
-| Animations | CSS Keyframes | Smooth transitions |
-| Copy to Clipboard | JavaScript Clipboard API | Modern clipboard interaction |
-
-## 🎨 Design Philosophy
-
-- **Minimalist**: Clean, uncluttered interface
-- **Accessibility**: High contrast, readable fonts
-- **Performance**: Lightweight and fast loading
-- **Modern**: Contemporary design trends
-- **Intuitive**: Self-explanatory user interface
-
-## 📈 Performance
-
-- **Generation Time**: < 100ms for standard QR codes
-- **File Size**: Optimized PNG output (~2-5KB)
-- **Page Load**: < 1 second on average connection
-- **Mobile Performance**: Smooth 60fps animations
-
-## 🔧 Configuration
-
-You can customize the QR code settings in `app.py`:
-
-```python
-qr = qrcode.QRCode(
-    version=1,                    # QR code version (1-40)
-    error_correction=qrcode.constants.ERROR_CORRECT_L,  # Error correction level
-    box_size=10,                  # Size of each box in pixels
-    border=4,                     # Border size in boxes
-)
-```
-
-### Error Correction Levels
-- `ERROR_CORRECT_L`: ~7% correction
-- `ERROR_CORRECT_M`: ~15% correction  
-- `ERROR_CORRECT_Q`: ~25% correction
-- `ERROR_CORRECT_H`: ~30% correction
+| Feature | Technology | Benefit |
+|---------|------------|---------|
+| Client-Side QR Generation | QRCode.js | No server load, works on any hosting platform |
+| No File I/O | Browser Canvas API | No file system permissions needed |
+| Lightweight Backend | Flask only | Minimal server requirements |
+| CDN Resources | External JS/CSS | Fast loading, cached resources |
+| Progressive Enhancement | Fallback support | Works on all browsers |
 
 ## 🚀 Deployment
+
+### Render.com
+1. Connect your GitHub repository to Render
+2. Use these settings:
+   - **Environment**: Python 3.11
+   - **Build Command**: `chmod +x render-build.sh && ./render-build.sh`
+   - **Start Command**: `gunicorn app:app`
+
+### Heroku
+1. Create a Heroku app
+2. Connect your GitHub repository
+3. The `Procfile` is already configured
+4. Deploy automatically
+
+### Vercel
+1. Connect your GitHub repository
+2. Set Framework Preset to "Other"
+3. Build Command: `pip install -r requirements.txt`
+4. Output Directory: `.`
+
+### Railway
+1. Connect your GitHub repository  
+2. Railway will auto-detect the Python app
+3. Uses `requirements.txt` and `Procfile` automatically
 
 ### Local Development
 ```bash
@@ -152,17 +144,6 @@ python app.py
 ### Production with Gunicorn
 ```bash
 gunicorn -w 4 -b 0.0.0.0:8000 app:app
-```
-
-### Docker (Optional)
-```dockerfile
-FROM python:3.9-slim
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY . .
-EXPOSE 5000
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:app"]
 ```
 
 ## 🤝 Contributing
