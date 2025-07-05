@@ -7,6 +7,8 @@
     <meta name="description" content="Generate QR codes instantly from any URL or text. Modern, fast, and easy to use QR code generator with download functionality.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- QR Code Library for Client-Side Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -334,10 +336,10 @@
             <p>Transform any URL or text into a beautiful QR code instantly</p>
         </div>
         
-        <form method="POST" id="qrForm" class="form-group">
+        <form id="qrForm" class="form-group">
             <div class="input-wrapper">
                 <i class="fas fa-link"></i>
-                <input type="text" name="link" id="link" placeholder="Enter your URL or text here..." required value="{{ link_val|default('') }}">
+                <input type="text" name="link" id="link" placeholder="Enter your URL or text here..." required>
             </div>
             <button type="submit" class="generate-btn">
                 <i class="fas fa-magic loading"></i>
@@ -346,29 +348,26 @@
             </button>
         </form>
         
-        {% if qr_img %}
-        <div class="qr-section">
+        <!-- QR Code Display Section -->
+        <div class="qr-section" id="qrSection" style="display: none;">
             <div class="success-message">
                 <i class="fas fa-check-circle"></i>
                 <span>QR Code generated successfully!</span>
             </div>
             
-            <div class="url-display">
-                <strong>Generated for:</strong> {{ link_val }}
+            <div class="url-display" id="urlDisplay">
+                <strong>Generated for:</strong> <span id="generatedUrl"></span>
             </div>
             
             <div class="qr-container">
-                <img id="qrImage" src="data:image/png;base64,{{ qr_img|safe }}" alt="QR Code">
+                <div id="qrcode"></div>
             </div>
             
             <div class="button-group">
-                <form method="POST" action="/download" style="display: inline;">
-                    <input type="hidden" name="link" value="{{ link_val }}">
-                    <button type="submit" class="download-btn">
-                        <i class="fas fa-download"></i>
-                        <span>Download PNG</span>
-                    </button>
-                </form>
+                <button type="button" class="download-btn" onclick="downloadQR()">
+                    <i class="fas fa-download"></i>
+                    <span>Download PNG</span>
+                </button>
                 
                 <button type="button" class="copy-btn" onclick="copyToClipboard()">
                     <i class="fas fa-copy"></i>
@@ -376,8 +375,9 @@
                 </button>
             </div>
         </div>
-        {% else %}
-        <div class="feature-grid">
+        
+        <!-- Feature Grid (shown when no QR code) -->
+        <div class="feature-grid" id="featureGrid">
             <div class="feature-item">
                 <i class="fas fa-bolt"></i>
                 <h3>Instant</h3>
@@ -399,7 +399,6 @@
                 <p>No data stored</p>
             </div>
         </div>
-        {% endif %}
         
         <div class="footer">
             <p>Made with ❤️ by <a href="#" target="_blank">Arshad</a></p>
@@ -408,9 +407,115 @@
     </div>
 
     <script>
+        let currentQRCode = null;
+        let currentLink = '';
+        
+        // Initialize QR code generation
+        document.getElementById('qrForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            generateQRCode();
+        });
+        
+        function generateQRCode() {
+            const link = document.getElementById('link').value;
+            if (!link) {
+                alert('Please enter a URL or text');
+                return;
+            }
+            
+            // Show loading state
+            const loadingIcon = document.querySelector('.loading');
+            const qrIcon = document.querySelector('.generate-btn .fa-qrcode');
+            const btnText = document.querySelector('.generate-btn span');
+            
+            loadingIcon.style.display = 'inline-block';
+            qrIcon.style.display = 'none';
+            btnText.textContent = 'Generating...';
+            
+            // Clear previous QR code
+            document.getElementById('qrcode').innerHTML = '';
+            
+            // Create QR code
+            try {
+                currentQRCode = new QRCode(document.getElementById('qrcode'), {
+                    text: link,
+                    width: 256,
+                    height: 256,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+                
+                currentLink = link;
+                
+                // Update UI
+                document.getElementById('generatedUrl').textContent = link;
+                document.getElementById('featureGrid').style.display = 'none';
+                document.getElementById('qrSection').style.display = 'block';
+                
+                // Reset button state
+                setTimeout(() => {
+                    loadingIcon.style.display = 'none';
+                    qrIcon.style.display = 'inline-block';
+                    btnText.textContent = 'Generate QR Code';
+                }, 500);
+                
+            } catch (error) {
+                console.error('Error generating QR code:', error);
+                alert('Error generating QR code. Please try again.');
+                
+                // Reset button state
+                loadingIcon.style.display = 'none';
+                qrIcon.style.display = 'inline-block';
+                btnText.textContent = 'Generate QR Code';
+            }
+        }
+        
+        function downloadQR() {
+            if (!currentQRCode) {
+                alert('Please generate a QR code first');
+                return;
+            }
+            
+            try {
+                // Get the canvas element created by QRCode.js
+                const canvas = document.querySelector('#qrcode canvas');
+                if (!canvas) {
+                    alert('QR code canvas not found');
+                    return;
+                }
+                
+                // Create download link
+                const link = document.createElement('a');
+                link.download = generateFileName(currentLink);
+                link.href = canvas.toDataURL('image/png');
+                
+                // Trigger download
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Update button text temporarily
+                const btn = document.querySelector('.download-btn span');
+                const originalText = btn.textContent;
+                btn.textContent = 'Downloaded!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Error downloading QR code:', error);
+                alert('Error downloading QR code. Please try again.');
+            }
+        }
+        
         function copyToClipboard() {
-            const link = "{{ link_val }}";
-            navigator.clipboard.writeText(link).then(function() {
+            if (!currentLink) {
+                alert('No link to copy');
+                return;
+            }
+            
+            navigator.clipboard.writeText(currentLink).then(function() {
                 const btn = document.querySelector('.copy-btn span');
                 const originalText = btn.textContent;
                 btn.textContent = 'Copied!';
@@ -419,26 +524,61 @@
                 }, 2000);
             }).catch(function(err) {
                 console.error('Could not copy text: ', err);
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = currentLink;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                const btn = document.querySelector('.copy-btn span');
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
             });
         }
         
-        document.getElementById('qrForm').addEventListener('submit', function() {
-            const loadingIcon = document.querySelector('.loading');
-            const qrIcon = document.querySelector('.generate-btn .fa-qrcode');
-            const btnText = document.querySelector('.generate-btn span');
+        function generateFileName(link) {
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
             
-            loadingIcon.style.display = 'inline-block';
-            qrIcon.style.display = 'none';
-            btnText.textContent = 'Generating...';
+            try {
+                const url = new URL(link);
+                const domain = url.hostname.replace(/[^\w\-_.]/g, '_');
+                return `qrcode_${domain}_${timestamp}.png`;
+            } catch (e) {
+                // Not a valid URL, use text
+                const text = link.substring(0, 20).replace(/[^\w\-_.]/g, '_');
+                return `qrcode_${text}_${timestamp}.png`;
+            }
+        }
+        
+        // Add floating animation to QR code when generated
+        function addFloatingAnimation() {
+            const qrContainer = document.querySelector('.qr-container');
+            if (qrContainer) {
+                qrContainer.style.animation = 'float 3s ease-in-out infinite';
+            }
+        }
+        
+        // Add floating animation after QR code is generated
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'childList') {
+                    const qrSection = document.getElementById('qrSection');
+                    if (qrSection.style.display === 'block') {
+                        setTimeout(addFloatingAnimation, 100);
+                    }
+                }
+            });
         });
         
-        // Add floating animation to QR code
-        {% if qr_img %}
-        document.addEventListener('DOMContentLoaded', function() {
-            const qrImage = document.getElementById('qrImage');
-            qrImage.style.animation = 'float 3s ease-in-out infinite';
+        observer.observe(document.getElementById('qrSection'), {
+            attributes: true,
+            attributeFilter: ['style']
         });
-        {% endif %}
     </script>
     
     <style>
